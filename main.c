@@ -160,12 +160,64 @@ void handleYearSel(struct Movie *list) {
     printf("\n");
 }
 
-void handleRatingSel(struct Movie *list) {
-    
+// Return 1 if number is in array, -1 if not
+int includes(int *array, int length, int val) {
+    int i;
+    for (i = 0; i < length; i++) {
+        if (array[i] == val) {
+            return 1;
+        }
+    }
+    return -1;
 }
 
-void handleLangSel(struct Movie *list) {
+// #TODO: Reimplement using a hash table data structure
+void handleRatingSel(struct Movie *list) {
+    const int max = list->moviesTotal;
+    // Use array to track the years that have already been printed to avoid showing years that have already been listed
+    int exclude[max];
+    // Set all values in exclude to -1 initially
+    memset(exclude, -1, sizeof (int) * max);
+    int countChecked = 0;
+    while (list != NULL) {               
+        if (includes(exclude, max, list->year) == -1) {
+            exclude[countChecked] = list->year;
+            countChecked++;
+            struct Movie *bestRated = list;     
+            struct Movie *temp = list;
+            while (temp != NULL) {
+                if (temp->year == bestRated->year && temp->rating > bestRated->rating) {
+                    bestRated = temp;
+                }
+                temp = temp->next;
+            }       
+            printf("%d %.1f %s\n", bestRated->year, bestRated->rating, bestRated->title);
+        }
+        list = list->next;
+    }
+    printf("\n");
+} 
 
+void handleLangSel(struct Movie *list) {
+    printf("Enter the language for which you want to see movies: ");
+    char desiredLang[20];
+    scanf("%s", &desiredLang);
+    int found = -1;
+    while (list != NULL) {          
+        int i;
+        for (i = 0; i < list->langsCount; i++) {
+            if (strcmp(list->languages[i], desiredLang) == 0) {
+                found = 1;
+                printf("%d %s\n", list->year, list->title);
+                break;
+            }
+        }         
+        list = list->next;
+    }
+    if (found == -1) {
+        printf("No data about movies released in %s\n", desiredLang);
+    }
+    printf("\n");
 }
 
 int main(int argc, char *argv[]) {        
