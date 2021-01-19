@@ -13,8 +13,8 @@ struct Movie {
     char *title;
     int year;
     int langsCount;
-    char **languages;    
-    float rating;
+    char *languages[5];    
+    double rating;
 
     // next is used so that Movie structs can be stored as a linked list
     struct Movie *next;
@@ -31,25 +31,54 @@ struct Movie* createMovie(char *currLine) {
     strcpy(newMovie->title, token);
 
     // The second token is the Year (int)
-
+    token = strtok_r(NULL, ",", &savePtr);
+    newMovie->year = atoi(token);     
+    
     // The third token is the Languages (array of strs)
+    token = strtok_r(NULL, ",", &savePtr);
+    // Create substring of token without the brackets [] to make it easier to parse 
+    // Must use malloc here to init substring so that it will persist outside of this function
+    char *tokenCopy = (char *)malloc((strlen(token)-1)*sizeof(char));   
+    memcpy(tokenCopy, &token[1], strlen(token)-2);
+    // Add a null terminator at the end of substring just in case
+    tokenCopy[strlen(token)-2] = '\0';
+    char *langPtr;
+    char *langToken;    
+    int langCount = 0;
+    for (langToken = strtok_r(tokenCopy, ";", &langPtr);
+         langToken != NULL;
+         langToken = strtok_r(NULL, ";", &langPtr)) {   
+        newMovie->languages[langCount] = langToken;
+        langCount++;        
+    }
+    newMovie->langsCount = langCount;   
 
-    // the fourth token is the Rating (float)
+    // The fourth token is the Rating (float)
+    token = strtok_r(NULL, ",", &savePtr);
+    // Required by strtod but not used elsewhere
+    char *tempPtr;
+    newMovie->rating = strtod(token, &tempPtr);
 
     newMovie->next = NULL;
-
-    // strcpy(movie->title, title);
-    // movie->title = title;
-    // movie->year = year;
-    // movie->langsCount = langsCount;
-    // movie->languages = languages;
-    // movie->rating = rating;    
+    
     return newMovie;
 }
 
-struct Movie* processFile(char *filePath) {
-    printf("Path is: %s\n", filePath);
+void printMoviesList(struct Movie *list)
+{
+    while (list != NULL)
+    {   
+        printf("Title: %s ", list->title);
+        printf("Year: %d ", list->year);
+        printf("Languages: %s %s %s %s %s ", list->languages[0], list->languages[1], list->languages[2], list->languages[3], list->languages[4]);
+        printf("Rating: %.1f", list->rating);
+        printf("\n");
+        list = list->next;
+    }
+    printf("\n");
+}
 
+struct Movie* processFile(char *filePath) {
      // Open the specified file for reading only
     FILE *moviesFile = fopen(filePath, "r");
 
@@ -63,22 +92,25 @@ struct Movie* processFile(char *filePath) {
     // The tail of the linked list
     struct Movie *tail = NULL;
 
+    int currRow = 0;
     // Read the file line by line
-    while ((nread = getline(&currLine, &len, moviesFile)) != -1)
-    {
+    while ((nread = getline(&currLine, &len, moviesFile)) != -1) {   
+        currRow++;
+        // Ignore first line
+        if (currRow == 1) {
+            continue;
+        }
+
         // Get a new Movie node corresponding to the current line
         struct Movie *newNode = createMovie(currLine);
 
         // Is this the first node in the linked list?
-        if (head == NULL)
-        {
+        if (head == NULL) {
             // This is the first node in the linked link
             // Set the head and the tail to this node
             head = newNode;
             tail = newNode;
-        }
-        else
-        {
+        } else {            
             // This is not the first node.
             // Add this node to the list and advance the tail
             tail->next = newNode;
@@ -88,15 +120,6 @@ struct Movie* processFile(char *filePath) {
     free(currLine);
     fclose(moviesFile);
     return head;
-}
-
-void printMoviesList(struct Movie *list)
-{
-    while (list != NULL)
-    {
-        printf("Title: %s\n", list->title);
-        list = list->next;
-    }
 }
 
 struct Node {
