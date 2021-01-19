@@ -201,7 +201,7 @@ void handleRatingSel(struct Movie *list) {
 void handleLangSel(struct Movie *list) {
     printf("Enter the language for which you want to see movies: ");
     char desiredLang[20];
-    scanf("%s", &desiredLang);
+    scanf("%s", desiredLang);
     int found = -1;
     while (list != NULL) {          
         int i;
@@ -221,9 +221,13 @@ void handleLangSel(struct Movie *list) {
 }
 
 int main(int argc, char *argv[]) {        
-    char filePath[] = "./movies_sample_1.csv";
-    struct Movie *list = processFile(filePath);
-    printf("Processed file %s and parsed data for %d movies.\n", filePath, list->moviesTotal);
+    if (argc < 2) {
+        printf("Name of file must be provided to process\n");
+        printf("Example usage: ./movies movies_sample_1.csv\n");
+        return EXIT_FAILURE;
+    }    
+    struct Movie *list = processFile(argv[1]);
+    printf("Processed file %s and parsed data for %d movies.\n", argv[1], list->moviesTotal);
     // printMoviesList(list);
 
     // Run program until user enters 4
