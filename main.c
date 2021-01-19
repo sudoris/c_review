@@ -15,8 +15,9 @@ struct Movie {
     int langsCount;
     char *languages[5];    
     double rating;
+    int moviesTotal;
 
-    // next is used so that Movie structs can be stored as a linked list
+    // next is used to link Movie structs together into a linked list
     struct Movie *next;
 };
 
@@ -119,22 +120,65 @@ struct Movie* processFile(char *filePath) {
     }
     free(currLine);
     fclose(moviesFile);
+
+    // Save count of Movie structs created in head
+    head->moviesTotal = currRow-1;
+
     return head;
 }
 
-struct Node {
-    struct Movie *movie;
-    struct Node *next;
-};
+void showOptions() {    
+    printf("1. Show movies released in the specified year\n");
+    printf("2. Show highest rated movie for each year\n");
+    printf("3. Show the title and year of release of all movies in a specific language\n");
+    printf("4. Exit from the program\n\n");
+}
 
-struct Node* createNode() {
+int getChoice() {
+    int choice;
+    printf("Enter a choice from 1 to 4: ");
+    scanf("%d", &choice);
 
-};
+    return choice;
+}
+
+void handleYearSel(struct Movie *list) {
+    printf("Enter the year for which you want to see movies: ");
+    int year;
+    scanf("%d", &year);
+}
+
+void handleRatingSel(struct Movie *list) {
+    
+}
+
+void handleLangSel(struct Movie *list) {
+
+}
 
 int main(int argc, char *argv[]) {        
     char filePath[] = "./movies_sample_1.csv";
     struct Movie *list = processFile(filePath);
-    printMoviesList(list);
+    printf("Processed file %s and parsed data for %d movies.\n", filePath, list->moviesTotal);
+    // printMoviesList(list);
+
+    // Run program until user enters 4
+    while(1) {
+        showOptions();
+        int selected = getChoice();
+        if (selected < 1 || selected > 4) {
+            printf("The option you have selected is not available. Please try again.\n\n");
+        } else if (selected == 1) {
+            handleYearSel(list);
+        } else if (selected == 2) {
+            handleRatingSel(list);
+        } else if (selected == 3) {
+            handleLangSel(list);
+        } else if (selected == 4) {
+            printf("Goodbye.\n");
+            break;
+        }
+    }    
 
     return EXIT_SUCCESS;     
 }
