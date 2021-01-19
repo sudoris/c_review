@@ -65,10 +65,8 @@ struct Movie* createMovie(char *currLine) {
     return newMovie;
 }
 
-void printMoviesList(struct Movie *list)
-{
-    while (list != NULL)
-    {   
+void printMoviesList(struct Movie *list) {
+    while (list != NULL) {   
         printf("Title: %s ", list->title);
         printf("Year: %d ", list->year);
         printf("Languages: %s %s %s %s %s ", list->languages[0], list->languages[1], list->languages[2], list->languages[3], list->languages[4]);
@@ -146,6 +144,20 @@ void handleYearSel(struct Movie *list) {
     printf("Enter the year for which you want to see movies: ");
     int year;
     scanf("%d", &year);
+
+    int matchCount = 0;
+    while (list != NULL) {       
+        if (list->year == year) {
+            matchCount++;
+            printf("%s\n", list->title);
+        }    
+        list = list->next;
+    }
+    // If no movies were found for year given, display a message
+    if (matchCount == 0) {
+        printf("No data for movies released in the year %d found\n", year);
+    } 
+    printf("\n");
 }
 
 void handleRatingSel(struct Movie *list) {
